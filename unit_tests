@@ -1,0 +1,48 @@
+# Databricks notebook source
+# MAGIC %pip install pytest
+
+# COMMAND ----------
+
+# MAGIC %run ./sum_values_function
+
+# COMMAND ----------
+
+def sum_values(df):
+    return df.selectExpr("sum(value) as total").collect()[0]["total"]
+
+# COMMAND ----------
+
+import pytest
+from pyspark.sql import SparkSession
+
+class TestSumValues:
+    @pytest.fixture(scope="class")
+    def spark(self):
+        return SparkSession.builder.appName("TestSumValues").getOrCreate()
+
+    @pytest.fixture(scope="class")
+    def sample_df(self, spark):
+        data = [(3,), (7,), (10,)]
+        return spark.createDataFrame(data, ["value"])
+
+    def test_sum_values(self, sample_df):
+        result = sum_values(sample_df)
+        assert result == 20
+
+# COMMAND ----------
+
+import sys
+
+sys.dont_write_bytecode = True
+
+retcode = pytest.main([".", "-p", "no:cacheprovider"])
+
+# Fail the cell execution if we have any test failures.
+assert retcode == 0, 'The pytest invocation failed. See the log above for details.'
+
+# COMMAND ----------
+
+data = [(3,), (7,), (10,)]
+sample_df = spark.createDataFrame(data, ["value"])
+result = sum_values(sample_df)
+assert result == 20
