@@ -1,5 +1,6 @@
 import pytest
 from pyspark.sql import SparkSession
+from sum_values_function import sum_values
 
 class TestSumValues:
     @pytest.fixture(scope="class")
